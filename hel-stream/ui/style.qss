@@ -1,0 +1,98 @@
+/* Helwan Stream - Dark & Gold Theme 
+    "الجمال في الصمت"
+*/
+
+/* النافذة الرئيسية */
+QMainWindow {
+    background-color: #0a0a0a;
+}
+
+/* شريط البحث */
+QLineEdit {
+    background-color: #1a1a1a;
+    border: 2px solid #333333;
+    border-radius: 8px;
+    padding: 10px;
+    color: #ffffff;
+    font-size: 14px;
+    selection-background-color: gold;
+}
+
+QLineEdit:focus {
+    border: 2px solid gold;
+}
+
+/* أزرار البحث */
+QPushButton {
+    background-color: gold;
+    color: #000000;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #e6c200;
+}
+
+QPushButton:pressed {
+    background-color: #cca300;
+}
+
+/* قائمة النتائج */
+QListWidget {
+    background-color: #0f0f0f;
+    border: none;
+    outline: none;
+    padding: 5px;
+}
+
+QListWidget::item {
+    background-color: #141414;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    padding: 5px;
+}
+
+QListWidget::item:selected {
+    background-color: #1f1f1f;
+    border: 1px solid gold;
+}
+
+/* شريط التقدم (التحميل) */
+QProgressBar {
+    border: 1px solid #333;
+    border-radius: 5px;
+    text-align: center;
+    background-color: #1a1a1a;
+    color: white;
+    font-weight: bold;
+    height: 15px;
+}
+
+QProgressBar::chunk {
+    background-color: gold;
+    width: 20px;
+}
+
+/* شريط الحالة الأسفل */
+QLabel#status_label {
+    color: #888888;
+    font-size: 12px;
+    padding: 5px;
+    background-color: #050505;
+    border-top: 1px solid #222;
+}
+
+/* القوائم المنسدلة (كليك يمين) */
+QMenu {
+    background-color: #1a1a1a;
+    color: white;
+    border: 1px solid #333;
+}
+
+QMenu::item:selected {
+    background-color: gold;
+    color: black;
+}
