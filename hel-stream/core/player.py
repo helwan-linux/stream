@@ -1,40 +1,33 @@
 import subprocess
 import shutil
+import os
 
 class PlayerManager:
     def __init__(self):
-        # Priority list of players
         self.supported_players = ['mpv', 'vlc', 'parole', 'mplayer']
 
     def find_available_player(self):
-        """
-        Check the system for any installed media player from the list.
-        """
         for player in self.supported_players:
             if shutil.which(player):
                 return player
         return None
 
     def play(self, stream_url, title="Helwan Stream"):
-        """
-        Launch the stream in the first available player found.
-        """
         player = self.find_available_player()
-        
         if not player:
-            return False, "No supported media player found on your system."
+            return False, "No player found"
+
+        # تحويل أي مسار فيه ~ لمسار حقيقي عشان الدونلود يشتغل
+        real_url = os.path.expanduser(stream_url)
 
         try:
-            # Different arguments for different players if needed
-            cmd = [player, stream_url]
-            
-            # Example: adding title for MPV
+            # ده السطر اللي شغل لك الفيديو في الترمينال
             if player == 'mpv':
-                cmd.append(f"--force-media-title={title}")
+                cmd = [player, real_url, "--vo=gpu", "--gpu-api=opengl", "--hwdec=auto"]
+            else:
+                cmd = [player, real_url]
             
-            # Run the player as a detached process
             subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return True, f"Playing with {player}"
-            
+            return True, f"Success"
         except Exception as e:
             return False, str(e)
