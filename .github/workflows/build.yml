@@ -32,3 +32,5 @@ jobs:
       with:
         name: hel-stream-package
         path: "*.pkg.tar.zst"
+
+        
