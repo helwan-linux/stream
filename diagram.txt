@@ -1,0 +1,24 @@
+https://github.com/helwan-linux/stream
+
+📁 hel-stream/
+├── 📁 assets
+│   └── 📁 icons
+│       └── 📄 stream.png
+├── 📄 config.json
+├── 📁 core
+│   ├── 📄 __init__.py
+│   ├── 📄 downloader.py
+│   ├── 📄 engine.py
+│   └── 📄 player.py
+├── 📄 hel-stream.desktop
+├── 📄 main.py
+├── 📄 requirements.txt
+├── 📁 ui
+│   ├── 📄 __init__.py
+│   ├── 📄 components.py
+│   ├── 📄 style.qss
+│   └── 📄 window.py
+└── 📁 utils
+    ├── 📄 __init__.py
+    ├── 📄 helpers.py
+    └── 📄 logger.py
