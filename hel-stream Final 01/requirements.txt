@@ -11,4 +11,5 @@ requests>=2.31.0
 # لدعم الأنواع والبيانات في بايثون
 typing-extensions>=4.5.0
 
-sudo pacman -S python-pyqt5 mpv python-requests yt-dlp
+sudo pacman -S --needed python-pyqt5 mpv python-requests yt-dlp python-pillow aria2 ffmpeg
+
