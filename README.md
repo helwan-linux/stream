@@ -1,45 +1,127 @@
-Helwan Stream (Beta)
-The Lightweight, Privacy-Focused Video Engine for Helwan Linux.
+# 📄 Helwan Linux Stream
 
-Helwan Stream is a high-performance video search and playback utility designed specifically for users who value system resources and privacy. Unlike resource-heavy web browsers, Helwan Stream decouples the video content from the website's bloat, providing a seamless experience even on legacy hardware (e.g., Core 2 Duo, 4GB RAM).
+**The Ultimate Multimedia Streaming & Downloading Engine for Helwan Linux.**
 
-🚀 Key Features
-Ultra-Low Resource Usage: Reduces CPU consumption by 40% to 60% compared to viewing in a browser by utilizing the raw power of MPV.
+---
 
-Privacy First: No tracking, no ads, and no JavaScript execution from video platforms. You watch the content, not the trackers.
+## 🌟 Overview
 
-Multi-Platform Search: Unified search engine for YouTube, Facebook, X (Twitter), and TikTok.
+**Helwan Stream** is a high-performance, multi-platform media tool designed to provide a seamless experience for searching, streaming, and downloading content from various sources like **YouTube**, **SoundCloud**, and more.
 
-Legacy Hardware Friendly: Optimized for older machines where modern browsers often struggle or crash.
+Built with **Python** and **PyQt5**, it focuses on **speed**, **stability**, and **Silent Recovery** for broken streams.
 
-Battery Saver: Extends laptop battery life significantly by using hardware-accelerated decoding.
+---
 
-Smart Downloader: Built-in capability to download video or "Audio Only" to save bandwidth.
+## 🚀 Key Features
 
-🛠 Tech Stack
-Language: Python 3
+* **Universal Search**
+  Unified search engine for YouTube, SoundCloud, TikTok, and more.
 
-UI Framework: PyQt5 (Native & Lightweight)
+* **Silent Recovery**
+  Multi-layered connection logic with User-Agent rotation to bypass blocks.
 
-Playback Engine: MPV (Direct Hardware Rendering)
+* **Quality Control**
+  Dynamic resolution selection (1080p, 720p, 480p, etc.).
 
-Backend Scraper: yt-dlp (Industry Standard)
+* **High-Speed Downloads**
+  Powered by `aria2c` for maximum bandwidth utilization.
 
-📥 Installation (Helwan Linux / Arch)
-Since the program relies on rolling-release packages, ensure your system is up to date:
+* **Minimalist UI**
+  Clean, dark-themed interface built with custom QSS.
 
-Bash
+* **Dependency Shield**
+  Automatic system check for required tools on startup.
 
-sudo pacman -Syu
-sudo pacman -S mpv yt-dlp python-pyqt5
-📖 Usage
-Launch the application.
+---
 
-Enter your search query in the search bar.
+## 📁 Project Structure
 
-Select your desired platform (YouTube/Facebook/etc.).
+```
+📁 hel-stream/
+├── 📁 assets/           # Application icons and branding
+├── 📄 config.json       # User settings and preferences
+├── 📁 core/             # Business logic (Engine, Player, Downloader)
+├── 📄 hel-stream.desktop # Linux desktop entry
+├── 📄 main.py           # Application entry point
+├── 📄 requirements.txt  # Python dependencies
+├── 📁 ui/               # GUI components and styling (QSS)
+├── 📁 utils/            # Logging and helper functions
+└── 📄 PKGBUILD          # Arch Linux package build configuration
+```
 
-Click on a video thumbnail to play instantly in the lightweight MPV player.
+---
 
-⚠️ Disclaimer
-Helwan Stream is an independent tool and is not affiliated with any video hosting platform. It is designed to provide a more efficient way to access publicly available content for educational and personal use.
+## 🛠️ Installation (Arch Linux)
+
+### 1️⃣ System Dependencies
+
+The app requires **mpv**, **ffmpeg**, and **aria2**. Install them using `pacman`:
+
+```bash
+sudo pacman -S --needed python-pyqt5 mpv python-requests yt-dlp python-pillow aria2 ffmpeg
+```
+
+### 2️⃣ Python Requirements
+
+Install the required Python libraries from the project root:
+
+```bash
+pip install -r requirements.txt --break-system-packages
+```
+
+### 3️⃣ Build & Install via PKGBUILD
+
+To install it as a native Arch Linux package:
+
+```bash
+makepkg -si
+```
+
+---
+
+## 🖥️ Usage
+
+Launch the application from the desktop menu or via terminal:
+
+```bash
+hel-stream
+```
+
+Or manually:
+
+```bash
+python main.py
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch:
+
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. Commit your changes:
+
+   ```bash
+   git commit -m 'Add some AmazingFeature'
+   ```
+4. Push to the branch:
+
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+5. Open a Pull Request
+
+---
+
+## 📜 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+Developed with ❤️ by the **Helwan Linux Team**
+**Maintained by:** *Saeed Badrelden*
