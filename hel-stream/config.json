@@ -2,7 +2,7 @@
     "default_player": "mpv",
     "quality": "720",
     "theme": "dark",
-    "download_path": "/home/user/Downloads",
+    "download_path": "~/Downloads",
     "app_name": "Helwan Stream",
     "icon_path": "assets/icons/logo.png"
 }
