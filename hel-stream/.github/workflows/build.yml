@@ -1,0 +1,47 @@
+name: Helwan Stream Build & Release
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libgl1-mesa-dev
+
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        # فحص الكود للتأكد من عدم وجود أخطاء برمجية قاتلة
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Create Release Asset (Source Zip)
+      run: |
+        zip -r hel-stream.zip . -x "*.git*" ".github*"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: helwan-stream-package
+        path: hel-stream.zip
