@@ -1,39 +1,38 @@
 # Maintainer: Saeed Badrelden <helwanlinux@gmail.com>
 pkgname=hel-stream
-_pkgname=hel-stream
-pkgver=1.0.0.r0.g$(git rev-parse --short HEAD 2>/dev/null || echo "0")
+pkgver=1.0.0
 pkgrel=1
-pkgdesc="High-performance multimedia streaming and downloading engine for Helwan Linux."
+pkgdesc="High-performance multimedia streaming engine for Helwan Linux."
 arch=('any')
 url="https://github.com/helwan-linux/stream"
 license=('MIT')
 depends=('python' 'python-pyqt5' 'python-requests' 'python-pillow' 'yt-dlp' 'mpv' 'aria2' 'ffmpeg')
-makedepends=('git')
-provides=("$_pkgname")
-conflicts=("$_pkgname")
-source=("git+https://github.com/helwan-linux/stream.git")
+
+# بنستخدم $SRCDEST عشان نجيب الملفات اللي الـ Action عمل لها Checkout فعلاً
+source=("${pkgname}::git+file://$GITHUB_WORKSPACE")
 md5sums=('SKIP')
 
 pkgver() {
-  cd "$_pkgname"
-  git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+  # بنعدل هنا عشان يدخل المجلد اللي اتعمل له Clone فعلياً
+  cd "$srcdir/${pkgname}"
+  printf "1.0.0"
 }
 
 package() {
-  cd "$srcdir/$_pkgname"
-
-  # إنشاء المجلدات اللازمة في النظام
-  install -dm755 "$pkgdir/usr/share/$_pkgname"
+  # الدخول للمجلد اللي فيه الكود
+  cd "$srcdir/${pkgname}"
+  
+  install -dm755 "$pkgdir/usr/share/${pkgname}"
+  
+  # نسخ الملفات - تأكد إن المجلدات دي موجودة في جذر المستودع عندك
+  cp -r core ui assets utils main.py requirements.txt "$pkgdir/usr/share/${pkgname}/"
+  
   install -dm755 "$pkgdir/usr/bin"
+  echo -e "#!/bin/bash\ncd /usr/share/${pkgname}\npython main.py \"\$@\"" > "$pkgdir/usr/bin/${pkgname}"
+  chmod +x "$pkgdir/usr/bin/${pkgname}"
 
-  # نسخ ملفات المشروع بالكامل (core, ui, assets, utils) 
-  cp -r core ui assets utils main.py config.json requirements.txt "$pkgdir/usr/share/$_pkgname/"
-
-  # إنشاء سكربت التشغيل في /usr/bin
-  echo -e "#!/bin/bash\npython /usr/share/$_pkgname/main.py \"\$@\"" > "$pkgdir/usr/bin/$_pkgname"
-  chmod +x "$pkgdir/usr/bin/$_pkgname"
-
-  # تثبيت ملف الـ Desktop والأيقونة
-  install -Dm644 "hel-stream.desktop" "$pkgdir/usr/share/applications/hel-stream.desktop"
-  install -Dm644 "assets/icons/stream.png" "$pkgdir/usr/share/pixmaps/hel-stream.png"
+  # البحث عن ملف الـ Desktop في الجذر
+  if [ -f "hel-stream.desktop" ]; then
+    install -Dm644 "hel-stream.desktop" "$pkgdir/usr/share/applications/hel-stream.desktop"
+  fi
 }
