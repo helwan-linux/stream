@@ -1,14 +1,14 @@
-# --- كبسولة اعتماديات حلوان لينكس ---
+# الأساسيات للواجهة والمحرك
+PyQt5>=5.15.0
+yt-dlp>=2024.03.10
 
-# المحرك والقلب التقني (Core Engine)
-yt-dlp                  # الأداة الأساسية لجلب الروابط والبحث [cite: 3]
+# للتعامل مع الصور (Thumbnail Processing) في الـ VideoCard
+Pillow>=10.0.0
 
-# واجهة المستخدم (User Interface)
-PyQt5                   # إطار عمل الواجهة الرسومية [cite: 6]
-PyQt5-sip               # مكتبة مكملة لضمان استقرار الواجهة
+# للتعامل مع الروابط والـ API في بعض المنصات
+requests>=2.31.0
 
-# معالجة الوسائط والشبكة
-requests                # للتعامل مع طلبات الصور والـ API
-certifi                 # لتحديث شهادات الأمان وتجنب أخطاء SSL في ويندوز
+# لدعم الأنواع والبيانات في بايثون
+typing-extensions>=4.5.0
 
-sudo pacman -S python-pyqt5 mpv python-requests
+sudo pacman -S python-pyqt5 mpv python-requests yt-dlp
