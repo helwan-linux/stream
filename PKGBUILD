@@ -11,34 +11,34 @@ source=("git+https://github.com/helwan-linux/stream.git")
 md5sums=('SKIP')
 
 package() {
-  # 1. الدخول لمجلد المستودع اللي جيت هاب عمله Clone
   cd "$srcdir/stream"
-
-  # 2. الدخول لمجلد المشروع الفعلي اللي إنت مصممه
-  # إحنا محتاجين الملفات اللي جوه hel-stream/
   local _app_dir="hel-stream"
 
   install -dm755 "$pkgdir/usr/share/hel-stream"
 
-  # 3. نسخ المحتويات من داخل مجلد hel-stream بالظبط كما في الهيكل اللي بعته
+  # نسخ المجلدات
   cp -r "$_app_dir/core" "$pkgdir/usr/share/hel-stream/"
   cp -r "$_app_dir/ui" "$pkgdir/usr/share/hel-stream/"
   cp -r "$_app_dir/assets" "$pkgdir/usr/share/hel-stream/"
   cp -r "$_app_dir/utils" "$pkgdir/usr/share/hel-stream/"
+  
+  # نسخ الملفات الفردية (تأكد من إضافة resource_saver.py هنا)
   cp "$_app_dir/main.py" "$pkgdir/usr/share/hel-stream/"
+  cp "$_app_dir/resource_saver.py" "$pkgdir/usr/share/hel-stream/" # <-- هذا هو السطر الحاسم
   cp "$_app_dir/config.json" "$pkgdir/usr/share/hel-stream/"
   cp "$_app_dir/requirements.txt" "$pkgdir/usr/share/hel-stream/"
+  
+  # إنشاء ملف __init__.py لضمان عدم حدوث ModuleNotFoundError
+  touch "$pkgdir/usr/share/hel-stream/__init__.py"
 
-  # 4. إعداد ملف التشغيل (Binary Launcher)
+  # إعداد ملف التشغيل (Binary Launcher)
   install -dm755 "$pkgdir/usr/bin"
   echo -e "#!/bin/bash\ncd /usr/share/hel-stream\npython main.py \"\$@\"" > "$pkgdir/usr/bin/hel-stream"
   chmod +x "$pkgdir/usr/bin/hel-stream"
 
-  # 5. تثبيت ملف الـ Desktop والأيقونة
+  # تثبيت الأيقونة والـ Desktop
+  install -Dm644 "$_app_dir/assets/icons/stream.png" "$pkgdir/usr/share/pixmaps/hel-stream.png"
   if [ -f "$_app_dir/hel-stream.desktop" ]; then
     install -Dm644 "$_app_dir/hel-stream.desktop" "$pkgdir/usr/share/applications/hel-stream.desktop"
   fi
-  
-  # تثبيت الأيقونة في مسار النظام ليراها ملف الـ Desktop
-  install -Dm644 "$_app_dir/assets/icons/stream.png" "$pkgdir/usr/share/pixmaps/hel-stream.png"
 }
