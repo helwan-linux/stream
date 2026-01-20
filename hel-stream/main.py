@@ -1,17 +1,23 @@
 import sys
 import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
+
+# الآن الاستيراد سيعمل بنجاح حتى بعد التثبيت
 import ctypes
 import shutil
-from PyQt5.QtWidgets import QApplication, QListWidgetItem, QMenu, QComboBox, QMessageBox
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QProcess
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QListWidgetItem, QMenu, QComboBox, QMessageBox 
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QProcess 
+from PyQt5.QtGui import QIcon 
 
-# Import Helwan Linux Stream components
-from ui.window import MainWindow
-from ui.components import VideoCard
-from core.engine import UniversalStreamEngine as StreamEngine
-from core.player import PlayerManager
+# استيراد المكونات
+from ui.window import MainWindow 
+from ui.components import VideoCard 
+from core.engine import UniversalStreamEngine as StreamEngine 
+from core.player import PlayerManager 
 
+# استيراد ملف توفير الموارد
 from resource_saver import apply_engine_saver, apply_ui_saver
 
 
@@ -256,3 +262,4 @@ if __name__ == "__main__":
 	window = HelwanStreamApp()
 	window.show()
 	sys.exit(app.exec_())
+
