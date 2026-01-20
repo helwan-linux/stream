@@ -91,9 +91,10 @@ class UniversalStreamEngine(QObject): # جعل الكلاس يدعم السيج�
         mapping = {
             "YouTube": f"ytsearch10:{query}",
             "SoundCloud": f"scsearch10:{query}",
-            "TikTok": f"https://www.tiktok.com/search?q={query}",
-            "Facebook": f"https://www.facebook.com/search/videos/?q={query}",
-            "Twitter": f"https://twitter.com/search?q={query}&f=video"
+            #"TikTok": f"https://www.tiktok.com/search?q={query}",
+            #"TikTok": f"ytsearch5:{query}",
+            #"Facebook": f"https://www.facebook.com/search/videos/?q={query}",
+            #"Twitter": f"https://twitter.com/search?q={query}&f=video"
         }
 
         targets = [mapping.get(platform, f"ytsearch10:{query}")] if platform != "All" else list(mapping.values())
