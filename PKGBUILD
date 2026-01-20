@@ -1,7 +1,7 @@
 # Maintainer: Saeed Badrelden <helwanlinux@gmail.com>
 pkgname=hel-stream
 pkgver=1.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc="High-performance multimedia streaming engine for Helwan Linux."
 arch=('any')
 url="https://github.com/helwan-linux/stream"
