@@ -1,6 +1,6 @@
 import sys
 import os
-script_dir = os.path.dirname(os.path.abspath(__file__))
+script_dir = os.path.dirname(os.path.realpath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
@@ -262,4 +262,5 @@ if __name__ == "__main__":
 	window = HelwanStreamApp()
 	window.show()
 	sys.exit(app.exec_())
+
 
