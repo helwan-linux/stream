@@ -1,0 +1,65 @@
+name: Build Stable Hel-Stream (Nuitka + Python 3.11)
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # استخدمنا حاوية بايثون 3.11 لضمان استقرار البيئة البرمجية
+    container:
+      image: python:3.11-bookworm
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Build Dependencies
+      run: |
+        apt-get update
+        # محتاجين الأدوات دي عشان Nuitka وعشان بناء حزم أرش لاحقاً
+        apt-get install -y patchelf binutils zstd
+        pip install --upgrade pip
+        pip install nuitka PyQt5  # المكتبات الأساسية لبرنامجك
+
+    - name: Build Standalone Binary with Nuitka
+      run: |
+        # بناء البرنامج كملف واحد مستقل (Standalone)
+        # ده اللي بيخلي البرنامج يشتغل عند المستخدم حتى لو عنده بايثون 3.14
+        python -m nuitka \
+               --standalone \
+               --onefile \
+               --plugin-enable=qt-plugins \
+               --output-dir=dist \
+               hel-stream.py
+
+    - name: Create Arch Linux Package Structure
+      run: |
+        # هنا بنجهز هيكل حزمة أرش (.pkg.tar.zst) يدوياً 
+        # لأننا داخل حاوية دبيان، فمش هنعرف نشغل makepkg بسهولة
+        mkdir -p pkg/usr/bin
+        cp dist/hel-stream pkg/usr/bin/
+        
+        # إنشاء ملف الوصف (metadata) لتعريف الحزمة لأرش لينكس
+        # ملاحظة: استبدل الإصدار والوصف بما يناسبك
+        echo "pkgname = hel-stream
+        pkgver = 1.0.0
+        pkgrel = 1
+        pkgdesc = Multimedia Streaming Tool for Helwan Linux
+        arch = x86_64
+        license = GPL
+        depends = qt5-base" > pkg/.PKGINFO
+
+    - name: Compress Package to .pkg.tar.zst
+      run: |
+        cd pkg
+        tar -cvf ../hel-stream-1.0.0-1-x86_64.pkg.tar .
+        cd ..
+        zstd hel-stream-1.0.0-1-x86_64.pkg.tar -o hel-stream-1.0.0-1-x86_64.pkg.tar.zst
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: hel-stream-python3.11-stable
+        path: "*.pkg.tar.zst"
