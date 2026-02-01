@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # استخدمنا حاوية بايثون 3.11 لضمان استقرار البيئة البرمجية
     container:
       image: python:3.11-bookworm
 
@@ -15,38 +14,39 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Install Build Dependencies
+    - name: Install System Dependencies
       run: |
         apt-get update
-        # محتاجين الأدوات دي عشان Nuitka وعشان بناء حزم أرش لاحقاً
-        apt-get install -y patchelf binutils zstd
+        # تثبيت الأدوات الضرورية لبناء واجهات Qt وضغط الحزم
+        apt-get install -y patchelf binutils zstd libgl1-mesa-glx libx11-6 libxext6 libxrender1 libxtst6 libxi6
         pip install --upgrade pip
-        pip install nuitka PyQt5  # المكتبات الأساسية لبرنامجك
+        # تثبيت المتطلبات البرمجية
+        pip install nuitka PyQt5
 
     - name: Build Standalone Binary with Nuitka
       run: |
-        # بناء البرنامج كملف واحد مستقل (Standalone)
-        # ده اللي بيخلي البرنامج يشتغل عند المستخدم حتى لو عنده بايثون 3.14
+        # --plugin-enable=pyqt5 هو المسمى الصحيح والحديث
+        # --onefile يدمج كل شيء في ملف واحد لسهولة التوزيع
         python -m nuitka \
                --standalone \
                --onefile \
-               --plugin-enable=qt-plugins \
+               --plugin-enable=pyqt5 \
                --output-dir=dist \
                hel-stream.py
 
     - name: Create Arch Linux Package Structure
       run: |
-        # هنا بنجهز هيكل حزمة أرش (.pkg.tar.zst) يدوياً 
-        # لأننا داخل حاوية دبيان، فمش هنعرف نشغل makepkg بسهولة
+        # إنشاء هيكلية ملفات حزمة أرش لينكس
         mkdir -p pkg/usr/bin
-        cp dist/hel-stream pkg/usr/bin/
+        # البحث عن الملف الناتج ونقله (Nuitka يغير الاسم أحياناً لملف تنفيذي)
+        cp dist/hel-stream pkg/usr/bin/hel-stream
+        chmod +x pkg/usr/bin/hel-stream
         
-        # إنشاء ملف الوصف (metadata) لتعريف الحزمة لأرش لينكس
-        # ملاحظة: استبدل الإصدار والوصف بما يناسبك
+        # إنشاء ملف الوصف (metadata) الخاص بـ pacman
         echo "pkgname = hel-stream
         pkgver = 1.0.0
         pkgrel = 1
-        pkgdesc = Multimedia Streaming Tool for Helwan Linux
+        pkgdesc = Multimedia Streaming Tool for Helwan Linux (Stable Python 3.11)
         arch = x86_64
         license = GPL
         depends = qt5-base" > pkg/.PKGINFO
@@ -54,12 +54,13 @@ jobs:
     - name: Compress Package to .pkg.tar.zst
       run: |
         cd pkg
+        # ضغط الحزمة باستخدام zstd كما طلبت لضمان السرعة والتوافق
         tar -cvf ../hel-stream-1.0.0-1-x86_64.pkg.tar .
         cd ..
-        zstd hel-stream-1.0.0-1-x86_64.pkg.tar -o hel-stream-1.0.0-1-x86_64.pkg.tar.zst
+        zstd --rm hel-stream-1.0.0-1-x86_64.pkg.tar -o hel-stream-1.0.0-1-x86_64.pkg.tar.zst
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: hel-stream-python3.11-stable
+        name: hel-stream-stable-v1.0.0
         path: "*.pkg.tar.zst"
