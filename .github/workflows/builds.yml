@@ -17,16 +17,20 @@ jobs:
     - name: Install System Dependencies
       run: |
         apt-get update
-        # تثبيت الأدوات الضرورية لبناء واجهات Qt وضغط الحزم
         apt-get install -y patchelf binutils zstd libgl1-mesa-glx libx11-6 libxext6 libxrender1 libxtst6 libxi6
         pip install --upgrade pip
-        # تثبيت المتطلبات البرمجية
         pip install nuitka PyQt5
+
+    - name: List Files (For Debugging)
+      run: |
+        echo "Checking current directory structure..."
+        ls -R
 
     - name: Build Standalone Binary with Nuitka
       run: |
-        # --plugin-enable=pyqt5 هو المسمى الصحيح والحديث
-        # --onefile يدمج كل شيء في ملف واحد لسهولة التوزيع
+        # إذا كان الملف داخل مجلد، استبدل hel-stream.py بمساره الصحيح 
+        # مثلاً لو في مجلد src اكتب src/hel-stream.py
+        # أنا سأفترض هنا أنه في الجذر، وإذا فشل، خطوة List Files ستكشف لنا مكانه
         python -m nuitka \
                --standalone \
                --onefile \
@@ -36,13 +40,17 @@ jobs:
 
     - name: Create Arch Linux Package Structure
       run: |
-        # إنشاء هيكلية ملفات حزمة أرش لينكس
         mkdir -p pkg/usr/bin
-        # البحث عن الملف الناتج ونقله (Nuitka يغير الاسم أحياناً لملف تنفيذي)
-        cp dist/hel-stream pkg/usr/bin/hel-stream
+        # Nuitka في وضع --onefile ينتج ملف تنفيذي واحد داخل dist
+        # سنتأكد من وجوده ونقله
+        if [ -f "dist/hel-stream.bin" ]; then
+          cp dist/hel-stream.bin pkg/usr/bin/hel-stream
+        elif [ -f "dist/hel-stream" ]; then
+          cp dist/hel-stream pkg/usr/bin/hel-stream
+        fi
+        
         chmod +x pkg/usr/bin/hel-stream
         
-        # إنشاء ملف الوصف (metadata) الخاص بـ pacman
         echo "pkgname = hel-stream
         pkgver = 1.0.0
         pkgrel = 1
@@ -54,7 +62,6 @@ jobs:
     - name: Compress Package to .pkg.tar.zst
       run: |
         cd pkg
-        # ضغط الحزمة باستخدام zstd كما طلبت لضمان السرعة والتوافق
         tar -cvf ../hel-stream-1.0.0-1-x86_64.pkg.tar .
         cd ..
         zstd --rm hel-stream-1.0.0-1-x86_64.pkg.tar -o hel-stream-1.0.0-1-x86_64.pkg.tar.zst
