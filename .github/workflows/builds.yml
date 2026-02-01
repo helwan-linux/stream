@@ -21,34 +21,39 @@ jobs:
         pip install --upgrade pip
         pip install nuitka PyQt5
 
-    - name: List Files (For Debugging)
+    - name: Build Standalone Binary
       run: |
-        echo "Checking current directory structure..."
-        ls -R
-
-    - name: Build Standalone Binary with Nuitka
-      run: |
-        # إذا كان الملف داخل مجلد، استبدل hel-stream.py بمساره الصحيح 
-        # مثلاً لو في مجلد src اكتب src/hel-stream.py
-        # أنا سأفترض هنا أنه في الجذر، وإذا فشل، خطوة List Files ستكشف لنا مكانه
+        # البحث عن الملف لضمان مكانه (لو هو في مجلد فرعي)
+        TARGET_FILE=$(find . -name "hel-stream.py" | head -n 1)
+        
+        if [ -z "$TARGET_FILE" ]; then
+          echo "FATAL: hel-stream.py not found in the repository!"
+          ls -R
+          exit 1
+        fi
+        
+        echo "Found file at: $TARGET_FILE"
+        
+        # التنفيذ من مكان وجود الملف
         python -m nuitka \
                --standalone \
                --onefile \
                --plugin-enable=pyqt5 \
                --output-dir=dist \
-               hel-stream.py
+               "$TARGET_FILE"
 
     - name: Create Arch Linux Package Structure
       run: |
         mkdir -p pkg/usr/bin
-        # Nuitka في وضع --onefile ينتج ملف تنفيذي واحد داخل dist
-        # سنتأكد من وجوده ونقله
-        if [ -f "dist/hel-stream.bin" ]; then
-          cp dist/hel-stream.bin pkg/usr/bin/hel-stream
-        elif [ -f "dist/hel-stream" ]; then
-          cp dist/hel-stream pkg/usr/bin/hel-stream
+        # البحث عن الملف الناتج في مجلد dist (Nuitka يخرجه باسم الملف الأصلي بدون .py)
+        BINARY_PATH=$(find dist -type f -executable | head -n 1)
+        
+        if [ -z "$BINARY_PATH" ]; then
+          echo "FATAL: Binary not produced by Nuitka!"
+          exit 1
         fi
         
+        cp "$BINARY_PATH" pkg/usr/bin/hel-stream
         chmod +x pkg/usr/bin/hel-stream
         
         echo "pkgname = hel-stream
