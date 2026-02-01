@@ -14,19 +14,32 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
+    # Cache pip packages
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    # Cache Nuitka build cache
+    - name: Cache Nuitka
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/nuitka
+        key: ${{ runner.os }}-nuitka
+
     - name: Install System Dependencies
       run: |
         apt-get update
-        apt-get install -y patchelf binutils zstd libgl1-mesa-glx libx11-6 libxext6 libxrender1 libxtst6 libxi6
+        apt-get install -y patchelf binutils zstd libgl1-mesa-glx libx11-6 libxext6 libxrender1 libxtst6 libxi6 clang
         pip install --upgrade pip
-        # تثبيت PyQt5 و Nuitka وأي متطلبات أخرى من ملفك
         pip install nuitka PyQt5
         if [ -f "hel-stream/requirements.txt" ]; then pip install -r hel-stream/requirements.txt; fi
 
     - name: Build Standalone Binary with Nuitka
       run: |
-        # الإشارة للملف الصحيح hel-stream/main.py
-        # استخدمنا --include-package لضمان سحب مجلدات core و ui و utils
         python -m nuitka \
                --standalone \
                --onefile \
@@ -34,6 +47,9 @@ jobs:
                --include-package=hel-stream \
                --output-dir=dist \
                --output-filename=hel-stream \
+               --clang \
+               --lto=no \
+               --jobs=2 \
                hel-stream/main.py
 
     - name: Create Arch Linux Package Structure
@@ -42,11 +58,9 @@ jobs:
         mkdir -p pkg/usr/share/applications
         mkdir -p pkg/usr/share/pixmaps
 
-        # نقل الملف التنفيذي الناتج
         cp dist/hel-stream pkg/usr/bin/hel-stream
         chmod +x pkg/usr/bin/hel-stream
 
-        # نقل الأيقونة وملف الـ desktop (بناءً على خريطتك)
         if [ -f "hel-stream/assets/icons/stream.png" ]; then
           cp hel-stream/assets/icons/stream.png pkg/usr/share/pixmaps/hel-stream.png
         fi
