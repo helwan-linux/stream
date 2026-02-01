@@ -19,42 +19,40 @@ jobs:
         apt-get update
         apt-get install -y patchelf binutils zstd libgl1-mesa-glx libx11-6 libxext6 libxrender1 libxtst6 libxi6
         pip install --upgrade pip
+        # تثبيت PyQt5 و Nuitka وأي متطلبات أخرى من ملفك
         pip install nuitka PyQt5
+        if [ -f "hel-stream/requirements.txt" ]; then pip install -r hel-stream/requirements.txt; fi
 
-    - name: Build Standalone Binary
+    - name: Build Standalone Binary with Nuitka
       run: |
-        # البحث عن الملف لضمان مكانه (لو هو في مجلد فرعي)
-        TARGET_FILE=$(find . -name "hel-stream.py" | head -n 1)
-        
-        if [ -z "$TARGET_FILE" ]; then
-          echo "FATAL: hel-stream.py not found in the repository!"
-          ls -R
-          exit 1
-        fi
-        
-        echo "Found file at: $TARGET_FILE"
-        
-        # التنفيذ من مكان وجود الملف
+        # الإشارة للملف الصحيح hel-stream/main.py
+        # استخدمنا --include-package لضمان سحب مجلدات core و ui و utils
         python -m nuitka \
                --standalone \
                --onefile \
                --plugin-enable=pyqt5 \
+               --include-package=hel-stream \
                --output-dir=dist \
-               "$TARGET_FILE"
+               --output-filename=hel-stream \
+               hel-stream/main.py
 
     - name: Create Arch Linux Package Structure
       run: |
         mkdir -p pkg/usr/bin
-        # البحث عن الملف الناتج في مجلد dist (Nuitka يخرجه باسم الملف الأصلي بدون .py)
-        BINARY_PATH=$(find dist -type f -executable | head -n 1)
-        
-        if [ -z "$BINARY_PATH" ]; then
-          echo "FATAL: Binary not produced by Nuitka!"
-          exit 1
-        fi
-        
-        cp "$BINARY_PATH" pkg/usr/bin/hel-stream
+        mkdir -p pkg/usr/share/applications
+        mkdir -p pkg/usr/share/pixmaps
+
+        # نقل الملف التنفيذي الناتج
+        cp dist/hel-stream pkg/usr/bin/hel-stream
         chmod +x pkg/usr/bin/hel-stream
+
+        # نقل الأيقونة وملف الـ desktop (بناءً على خريطتك)
+        if [ -f "hel-stream/assets/icons/stream.png" ]; then
+          cp hel-stream/assets/icons/stream.png pkg/usr/share/pixmaps/hel-stream.png
+        fi
+        if [ -f "hel-stream/hel-stream.desktop" ]; then
+          cp hel-stream/hel-stream.desktop pkg/usr/share/applications/
+        fi
         
         echo "pkgname = hel-stream
         pkgver = 1.0.0
