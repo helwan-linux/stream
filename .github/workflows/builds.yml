@@ -1,4 +1,4 @@
-name: Build Stable Hel-Stream (Nuitka + Python 3.11)
+name: Build Stable Hel-Stream (Optimized)
 
 on:
   push:
@@ -14,77 +14,57 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # Cache pip packages
-    - name: Cache pip
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    # Cache Nuitka build cache
-    - name: Cache Nuitka
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/nuitka
-        key: ${{ runner.os }}-nuitka
-
     - name: Install System Dependencies
       run: |
-        apt-get update
-        apt-get install -y patchelf binutils zstd libgl1-mesa-glx libx11-6 libxext6 libxrender1 libxtst6 libxi6 clang
+        apt-get update && apt-get install -y \
+        patchelf binutils zstd libgl1-mesa-glx libx11-6 libxcb-icccm4 \
+        libxcb-image0 libxcb-keysyms1 libxcb-render-util0 \
+        libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 clang
         pip install --upgrade pip
         pip install nuitka PyQt5
         if [ -f "hel-stream/requirements.txt" ]; then pip install -r hel-stream/requirements.txt; fi
 
-    - name: Build Standalone Binary with Nuitka
+    - name: Build with Nuitka
       run: |
         python -m nuitka \
                --standalone \
-               --onefile \
                --plugin-enable=pyqt5 \
+               --include-qt-plugins=all \
+               --follow-imports \
                --include-package=hel-stream \
                --output-dir=dist \
-               --output-filename=hel-stream \
                --clang \
-               --lto=no \
-               --jobs=2 \
+               --jobs=$(nproc) \
                hel-stream/main.py
 
     - name: Create Arch Linux Package Structure
       run: |
-        mkdir -p pkg/usr/bin
-        mkdir -p pkg/usr/share/applications
-        mkdir -p pkg/usr/share/pixmaps
-
-        cp dist/hel-stream pkg/usr/bin/hel-stream
-        chmod +x pkg/usr/bin/hel-stream
-
+        mkdir -p pkg/usr/bin pkg/usr/lib/hel-stream pkg/usr/share/applications pkg/usr/share/pixmaps
+        
+        # نقل الملفات بدلاً من Onefile لضمان الاستقرار
+        cp -r dist/main.dist/* pkg/usr/lib/hel-stream/
+        
+        # عمل رابط رمزي للتشغيل
+        ln -s /usr/lib/hel-stream/main pkg/usr/bin/hel-stream
+        
         if [ -f "hel-stream/assets/icons/stream.png" ]; then
           cp hel-stream/assets/icons/stream.png pkg/usr/share/pixmaps/hel-stream.png
         fi
+        
+        # تعديل مسار الأيقونة في ملف الـ desktop إذا لزم الأمر
         if [ -f "hel-stream/hel-stream.desktop" ]; then
           cp hel-stream/hel-stream.desktop pkg/usr/share/applications/
         fi
         
-        echo "pkgname = hel-stream
-        pkgver = 1.0.0
-        pkgrel = 1
-        pkgdesc = Multimedia Streaming Tool for Helwan Linux (Stable Python 3.11)
-        arch = x86_64
-        license = GPL
-        depends = qt5-base" > pkg/.PKGINFO
+        echo -e "pkgname = hel-stream\npkgver = 1.0.0\npkgrel = 1\npkgdesc = Multimedia Streaming Tool for Helwan Linux\narch = x86_64\nlicense = GPL\ndepends = qt5-base libxkbcommon-x11" > pkg/.PKGINFO
 
-    - name: Compress Package to .pkg.tar.zst
+    - name: Compress Package
       run: |
         cd pkg
-        tar -cvf ../hel-stream-1.0.0-1-x86_64.pkg.tar .
-        cd ..
-        zstd --rm hel-stream-1.0.0-1-x86_64.pkg.tar -o hel-stream-1.0.0-1-x86_64.pkg.tar.zst
+        tar -I 'zstd -1' -cvf ../hel-stream-1.0.0-1-x86_64.pkg.tar.zst .
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: hel-stream-stable-v1.0.0
+        name: hel-stream-stable
         path: "*.pkg.tar.zst"
